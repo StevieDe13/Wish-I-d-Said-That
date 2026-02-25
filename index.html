@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fffbf0">
+<title>Wish I'd Said That! 💬</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fffbf0;
+    --yellow: #ffd93d;
+    --orange: #ff6b35;
+    --pink: #ff4d8d;
+    --teal: #00c9a7;
+    --purple: #7c5cbf;
+    --dark: #2d2640;
+    --card: #ffffff;
+    --shadow: rgba(45,38,64,0.12);
+    --border: rgba(45,38,64,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* Fun background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(255,217,61,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255,77,141,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 60% 20%, rgba(0,201,167,0.1) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 20px env(safe-area-inset-bottom, 20px);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    padding: 24px 0 8px;
+    text-align: center;
+  }
+
+  .header-emoji {
+    font-size: 3rem;
+    display: block;
+    animation: wobble 3s ease-in-out infinite;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  @keyframes wobble {
+    0%,100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  .app-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    color: var(--dark);
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .app-title span { color: var(--orange); }
+
+  .app-subtitle {
+    font-size: 0.88rem;
+    color: rgba(45,38,64,0.55);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* Situation types */
+  .situation-types {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0 16px;
+  }
+
+  .type-chip {
+    padding: 7px 14px;
+    border-radius: 100px;
+    border: 2px solid var(--border);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(45,38,64,0.6);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .type-chip.selected {
+    border-color: var(--orange);
+    background: var(--orange);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  .type-chip:active { transform: scale(0.96); }
+
+  /* Input area */
+  .input-card {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 2px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .input-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(45,38,64,0.4);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .situation-input {
+    width: 100%;
+    border: 2px solid rgba(45,38,64,0.1);
+    border-radius: 16px;
+    padding: 14px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+    background: var(--bg);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 90px;
+  }
+
+  .situation-input:focus { border-color: var(--orange); }
+  .situation-input::placeholder { color: rgba(45,38,64,0.3); font-weight: 600; }
+
+  .generate-btn {
+    width: 100%;
+    height: 58px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+    transition: all 0.2s;
+  }
+
+  .generate-btn:active { transform: scale(0.97); }
+
+  /* Result card */
+  .result-card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 24px var(--shadow);
+    border: 2px solid var(--border);
+    margin-bottom: 16px;
+    display: none;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .result-card.show { display: block; }
+
+  @keyframes popIn {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .result-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,107,53,0.1);
+    color: var(--orange);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .speech-bubble {
+    background: linear-gradient(135deg, #fff9f0, #fff0f5);
+    border: 2px solid rgba(255,107,53,0.15);
+    border-radius: 20px 20px 20px 4px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .speech-bubble::before {
+    content: '"';
+    font-family: 'Fredoka One', cursive;
+    font-size: 4rem;
+    color: rgba(255,107,53,0.15);
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    line-height: 1;
+  }
+
+  .result-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.25rem;
+    color: var(--dark);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  .result-context {
+    font-size: 0.8rem;
+    color: rgba(45,38,64,0.5);
+    font-weight: 600;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* Action buttons */
+  .result-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .act-btn {
+    flex: 1;
+    min-width: 80px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: white;
+    color: rgba(45,38,64,0.6);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+
+  .act-btn:active { transform: scale(0.95); }
+  .act-btn.save-btn:hover { border-color: var(--pink); color: var(--pink); }
+  .act-btn.copy-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .act-btn.another-btn {
+    background: linear-gradient(135deg, var(--teal), #00a886);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 3px 12px rgba(0,201,167,0.3);
+  }
+
+  /* Random button */
+  .random-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    border: 2px dashed rgba(45,38,64,0.2);
+    background: transparent;
+    color: rgba(45,38,64,0.5);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .random-btn:hover { border-color: var(--purple); color: var(--purple); background: rgba(124,92,191,0.05); }
+  .random-btn:active { transform: scale(0.97); }
+
+  /* Saved section */
+  .saved-section {
+    margin-bottom: 24px;
+  }
+
+  .saved-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .saved-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--dark);
+  }
+
+  .clear-btn {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(45,38,64,0.35);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .saved-item {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(-10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .saved-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.92rem;
+    color: var(--dark);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .saved-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--orange);
+    background: rgba(255,107,53,0.1);
+    padding: 2px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: rgba(45,38,64,0.25);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .no-saved {
+    text-align: center;
+    color: rgba(45,38,64,0.35);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 16px 0;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Loading state */
+  .generating {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: rgba(45,38,64,0.5);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .generating.show { display: block; }
+  .generating span { animation: dots 1.2s infinite; display: inline-block; }
+  .generating span:nth-child(2) { animation-delay: 0.2s; }
+  .generating span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dots { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="header-emoji">💬</span>
+    <h1 class="app-title">Wish I'd Said <span>That!</span></h1>
+    <p class="app-subtitle">The perfect comeback — three hours too late 😅</p>
+  </div>
+
+  <!-- Situation type chips -->
+  <div class="situation-types">
+    <button class="type-chip selected" onclick="selectType(this, 'general')">😅 Any situation</button>
+    <button class="type-chip" onclick="selectType(this, 'boss')">👔 Boss/work</button>
+    <button class="type-chip" onclick="selectType(this, 'family')">👨‍👩‍👧 Family</button>
+    <button class="type-chip" onclick="selectType(this, 'friend')">🙃 Friends</button>
+    <button class="type-chip" onclick="selectType(this, 'stranger')">🛒 Strangers</button>
+    <button class="type-chip" onclick="selectType(this, 'date')">💘 Dating</button>
+  </div>
+
+  <!-- Input -->
+  <div class="input-card">
+    <label class="input-label">What happened? 👇</label>
+    <textarea 
+      class="situation-input" 
+      id="situationInput"
+      placeholder="e.g. My boss said my idea was 'interesting' in that tone..."
+      maxlength="300"
+    ></textarea>
+    <button class="generate-btn" onclick="generate()">
+      ✨ What should I have said?
+    </button>
+  </div>
+
+  <!-- Random -->
+  <button class="random-btn" onclick="randomLine()">
+    🎲 Just give me something funny
+  </button>
+
+  <!-- Generating indicator -->
+  <div class="generating" id="generating">
+    Cooking up something brilliant<span>.</span><span>.</span><span>.</span>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card" id="resultCard">
+    <div class="result-tag" id="resultTag">💡 What you should have said</div>
+    <div class="speech-bubble">
+      <div class="result-text" id="resultText"></div>
+      <div class="result-context" id="resultContext"></div>
+    </div>
+    <div class="result-actions">
+      <button class="act-btn save-btn" onclick="saveLine()">♡ Save</button>
+      <button class="act-btn copy-btn" onclick="copyLine()">⎘ Copy</button>
+      <button class="act-btn another-btn" onclick="generate()">↺ Another</button>
+    </div>
+  </div>
+
+  <!-- Saved -->
+  <div class="saved-section" id="savedSection" style="display:none">
+    <div class="saved-header">
+      <div class="saved-title">⭐ Your best lines</div>
+      <button class="clear-btn" onclick="clearAll()">Clear all</button>
+    </div>
+    <div id="savedList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────
+let selectedType = 'general';
+let currentLine = '';
+let currentContext = '';
+let savedLines = [];
+
+// Load saved lines from localStorage
+try { savedLines = JSON.parse(localStorage.getItem('wishid-saved') || '[]'); } catch(e) { savedLines = []; }
+renderSaved();
+
+// ── Situation type selector ───────────────────────────
+function selectType(btn, type) {
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedType = type;
+}
+
+// ── Lines database ────────────────────────────────────
+const linesByType = {
+  boss: [
+    { line: `Oh, I'm sorry — I must have accidentally used my brain. I'll try harder next time.`, context: `When your idea gets dismissed` },
+    { line: `Thank you for that feedback! I'll add it to my collection of things I'll think about on my lunch break and then completely ignore.`, context: `After unhelpful criticism` },
+    { line: `You're right. Let me just pop that right into the bin along with my will to live.`, context: `When told to redo everything` },
+    { line: `I would love to stay late but my houseplant has a therapy session and honestly it needs me more than you do.`, context: `Asked to stay late again` },
+    { line: `I've written that down! Just kidding, I wrote down literally anything else.`, context: `During a boring meeting` },
+    { line: `Fascinating. And yet here we both are, still employed. Life is full of mysteries.`, context: `After being questioned` },
+    { line: `I'll get right on that! Right after I finish staring at this wall for twenty minutes.`, context: `Given an unreasonable deadline` },
+    { line: `Oh, was that criticism? I genuinely couldn't tell because it had so many words in it.`, context: `Long confusing feedback` },
+    { line: `I appreciate your input! I have stored it safely in the recycling bin of my mind.`, context: `Unsolicited advice at work` },
+    { line: `Great point! Do you also have thoughts on gravity? Because I feel like you might.`, context: `When someone states the obvious` },
+  ],
+  family: [
+    { line: `You're right, I should have done that differently. Anyway, who taught me everything I know? That's right. Moving on.`, context: `Parental advice you didn't ask for` },
+    { line: `Noted! I'll add that to the list of things I'm definitely going to do right after I finish being a whole adult.`, context: `Unsolicited life advice` },
+    { line: `Oh I'm sorry, I didn't realise we were doing the thing where everyone talks about me as if I'm not here.`, context: `Being discussed at family dinner` },
+    { line: `Yes, cousin Sharon did get married at 24. Cousin Sharon also irons her socks. We all have our own paths.`, context: `Comparison to other relatives` },
+    { line: `I love you but I also love the sound of this conversation ending.`, context: `Repetitive argument` },
+    { line: `That's a wonderful story. I hope it has an ending.`, context: `Very long anecdote` },
+    { line: `I've made a note of that. It will live next to all the other notes I've made at Christmas.`, context: `Annual reminder about life choices` },
+    { line: `Mum, with all the love in my heart — I did not ask.`, context: `Unrequested opinion` },
+    { line: `You know what they say — the family that judges together, stays together. But barely.`, context: `General family gathering energy` },
+    { line: `I'll think about it! That's not a promise, that's just a description of what my brain will be doing.`, context: `Being told to reconsider a decision` },
+  ],
+  friend: [
+    { line: `Oh I'm sorry, I thought this was a friendship, not a one-star review of my life choices.`, context: `Unexpected criticism from a friend` },
+    { line: `That's so helpful! Almost as helpful as the time you gave me that advice and then did the exact same thing yourself.`, context: `Hypocritical advice` },
+    { line: `I appreciate you. I do not appreciate this conversation. There is a difference.`, context: `Uncomfortable topic` },
+    { line: `Bold of you to assume I've thought this through. I absolutely have not. That's part of my charm.`, context: `Being called out for impulsiveness` },
+    { line: `I know, I know! And yet here I am, thriving in my own chaotic way.`, context: `When your bad habits are pointed out` },
+    { line: `You're my best friend. You're also the reason I need therapy. These are not mutually exclusive.`, context: `A friend's dramatic moment` },
+    { line: `Sorry, I can't hear you over the sound of me doing whatever I want.`, context: `Unsolicited life coaching` },
+    { line: `That's a really good point and I'm going to pretend you never made it.`, context: `Too-accurate observation` },
+    { line: `I love you. Please stop talking.`, context: `When a friend won't let something go` },
+    { line: `You know what I love about you? You always say what everyone's thinking and no one asked.`, context: `Overly honest friend moment` },
+  ],
+  stranger: [
+    { line: `Thank you for that! I was running low on unsolicited opinions and you've really topped me up.`, context: `Random stranger's comment` },
+    { line: `Wow. You said that out loud. With your actual mouth. Today.`, context: `Rude comment from a stranger` },
+    { line: `I'm going to need you to take that energy and aim it literally anywhere else.`, context: `Queue or public transport drama` },
+    { line: `I respect your confidence in sharing that opinion that nobody asked for.`, context: `Public unsolicited advice` },
+    { line: `That's fascinating. Is this your first time having a thought or do you do this regularly?`, context: `Silly argument with a stranger` },
+    { line: `I'd love to continue this conversation but I have to go be somewhere you aren't.`, context: `Unwanted chat` },
+    { line: `You're right, I should smile more. You should think more. We both have things to work on.`, context: `Told to smile by a stranger` },
+    { line: `I see you've mistaken me for someone who was going to respond well to that.`, context: `Rude comment in public` },
+    { line: `Cool! I'm going to walk away now and we're both going to pretend this never happened.`, context: `Awkward encounter` },
+    { line: `Bless your heart. Truly. From a distance.`, context: `Any mildly annoying stranger` },
+  ],
+  date: [
+    { line: `Oh interesting! So you're the kind of person who says that. Good to know before the main course.`, context: `Red flag on a first date` },
+    { line: `I'm actually really busy that day. And the next one. And most days going forward.`, context: `After a bad date asks for another` },
+    { line: `That's a great story! It has everything. A beginning, a middle, and a me checking my phone.`, context: `Date won't stop talking about themselves` },
+    { line: `I appreciate you being so upfront about your personality. It saves so much time.`, context: `Revealing comment early in date` },
+    { line: `Wow you're really passionate about your ex. Have you considered... calling them instead of me?`, context: `Date talks about their ex too much` },
+    { line: `I like you! I like you the way you like a song that's fine but you'd change it if something better came on.`, context: `Meh chemistry` },
+    { line: `That's so funny! That's not actually funny but I'm giving you points for trying.`, context: `Bad joke attempt` },
+    { line: `I'm getting a really interesting picture of who you are and I'm choosing not to finish painting it.`, context: `Something a bit off` },
+    { line: `You know what, let's just get the bill. For both of us. As a treat. For me.`, context: `Date going badly` },
+    { line: `I had a great time tonight! I won't be thinking about this again but I genuinely wish you well.`, context: `Polite goodbye after meh date` },
+  ],
+  general: [
+    { line: `I'm going to need a moment to process that, and by 'a moment' I mean approximately the rest of my life.`, context: `Something completely unexpected` },
+    { line: `That's genuinely one of the most interesting things anyone has said to me. Not good interesting. Just interesting.`, context: `Weird or rude comment` },
+    { line: `You know, I was just thinking 'what this situation needs is an unsolicited opinion' and here you are!`, context: `Unrequested advice from anyone` },
+    { line: `I'll take that on board. And then immediately disembark.`, context: `Criticism you didn't need` },
+    { line: `Sorry, I was distracted by the sound of me not caring. Could you repeat that?`, context: `Someone going on and on` },
+    { line: `Wow, you really went there. On foot. With no map.`, context: `Someone said something wild` },
+    { line: `I'm choosing to interpret that as a compliment and walk away while I'm ahead.`, context: `Ambiguous comment` },
+    { line: `That's amazing feedback. I'm going to let it wash over me like a gentle wave of nope.`, context: `Unhelpful comment` },
+    { line: `You raise a great point and I am going to think about it for zero seconds.`, context: `Point you disagree with` },
+    { line: `I respect your confidence. I do not share it. But I respect it.`, context: `Someone very sure of themselves` },
+    { line: `I appreciate you. Genuinely. From here. At this distance.`, context: `Someone who means well but is a lot` },
+    { line: `Noted! Filed under 'things that will not be affecting my day'.`, context: `Minor criticism or jab` },
+    { line: `I love that for you. I don't love it for me but I really love it for you.`, context: `Someone's bad advice` },
+    { line: `That's such a you thing to say. And I mean that in the most specific way possible.`, context: `Classic 'that person' behaviour` },
+    { line: `I'm going to go ahead and pretend that question was rhetorical.`, context: `Question you don't want to answer` },
+  ]
+};
+
+// Situation-based response templates
+const situationResponses = {
+  ignored: [
+    `Sorry, I was just mapping out all the ways to exit this conversation.`,
+    `Hold on, I'm composing my response in a language you'll actually hear.`,
+    `I was going to say something but then I remembered: why bother.`,
+  ],
+  late: [
+    `I'm not late. Everyone else is just aggressively early.`,
+    `Time is a social construct and I refuse to be bound by your constructs.`,
+    `I was here in spirit the whole time. My body just takes longer.`,
+  ],
+  boring: [
+    `Wow, this is fascinating. I'm so glad I woke up today.`,
+    `Please keep going. I'm listening so hard right now.`,
+    `I'm riveted. Truly. This is the best use of everyone's time.`,
+  ],
+  rude: [
+    `I'm sorry, I think your filter fell off. Do you need a moment to find it?`,
+    `Interesting choice of words! Really bold. Unasked for but bold.`,
+    `I'm going to give you the gift of pretending you didn't just say that.`,
+  ],
+  comparison: [
+    `Oh you're comparing me to other people? How original! How classic! How very you!`,
+    `Noted! I'll add that to my list of comparisons I didn't ask for and won't be using.`,
+    `Wonderful! We're all on different journeys and mine apparently includes this conversation.`,
+  ],
+};
+
+function detectSituationKeywords(text) {
+  const t = text.toLowerCase();
+  if (t.includes('ignor') || t.includes('didn\'t listen') || t.includes('not listening')) return 'ignored';
+  if (t.includes('late') || t.includes('early') || t.includes('time')) return 'late';
+  if (t.includes('boring') || t.includes('long story') || t.includes('wouldn\'t stop talking')) return 'boring';
+  if (t.includes('rude') || t.includes('mean') || t.includes('said something') || t.includes('called me')) return 'rude';
+  if (t.includes('compared') || t.includes('why can\'t you') || t.includes('should be more like')) return 'comparison';
+  return null;
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+let lastIndex = -1;
+
+function getLineForType(type) {
+  const lines = linesByType[type] || linesByType.general;
+  let idx;
+  do { idx = Math.floor(Math.random() * lines.length); } while (idx === lastIndex && lines.length > 1);
+  lastIndex = idx;
+  return lines[idx];
+}
+
+function generate() {
+  const input = document.getElementById('situationInput').value.trim();
+  
+  // Show generating state
+  document.getElementById('generating').classList.add('show');
+  document.getElementById('resultCard').classList.remove('show');
+
+  setTimeout(() => {
+    document.getElementById('generating').classList.remove('show');
+
+    let result;
+
+    if (input.length > 5) {
+      // Try to match situation keywords first
+      const keyword = detectSituationKeywords(input);
+      if (keyword && Math.random() > 0.4) {
+        result = {
+          line: pick(situationResponses[keyword]),
+          context: `For your situation`
+        };
+      } else {
+        result = getLineForType(selectedType);
+      }
+    } else {
+      result = getLineForType(selectedType);
+    }
+
+    currentLine = result.line;
+    currentContext = result.context;
+
+    document.getElementById('resultText').textContent = result.line;
+    document.getElementById('resultContext').textContent = result.context;
+    document.getElementById('resultCard').classList.add('show');
+
+  }, 600 + Math.random() * 400);
+}
+
+function randomLine() {
+  document.getElementById('situationInput').value = '';
+  const allTypes = Object.keys(linesByType);
+  const randomType = pick(allTypes);
+  const result = getLineForType(randomType);
+  currentLine = result.line;
+  currentContext = result.context;
+
+  document.getElementById('generating').classList.add('show');
+  document.getElementById('resultCard').classList.remove('show');
+
+  setTimeout(() => {
+    document.getElementById('generating').classList.remove('show');
+    document.getElementById('resultText').textContent = result.line;
+    document.getElementById('resultContext').textContent = result.context;
+    document.getElementById('resultCard').classList.add('show');
+  }, 500);
+}
+
+// ── Save ──────────────────────────────────────────────
+function saveLine() {
+  if (!currentLine) return;
+  if (savedLines.find(s => s.line === currentLine)) { showToast('Already saved! ⭐'); return; }
+  savedLines.unshift({ line: currentLine, context: currentContext, type: selectedType });
+  localStorage.setItem('wishid-saved', JSON.stringify(savedLines));
+  renderSaved();
+  showToast('Saved to your best lines! ⭐');
+}
+
+function deleteSaved(i) {
+  savedLines.splice(i, 1);
+  localStorage.setItem('wishid-saved', JSON.stringify(savedLines));
+  renderSaved();
+}
+
+function clearAll() {
+  if (!confirm('Clear all saved lines?')) return;
+  savedLines = [];
+  localStorage.setItem('wishid-saved', JSON.stringify(savedLines));
+  renderSaved();
+}
+
+function renderSaved() {
+  const section = document.getElementById('savedSection');
+  const list = document.getElementById('savedList');
+  if (savedLines.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = savedLines.map((s, i) => `
+    <div class="saved-item">
+      <div style="flex:1">
+        <div class="saved-text">${s.line}</div>
+        <div class="saved-tag">${s.context}</div>
+      </div>
+      <button class="del-btn" onclick="deleteSaved(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── Copy ──────────────────────────────────────────────
+function copyLine() {
+  if (!currentLine) return;
+  navigator.clipboard.writeText(currentLine).then(() => showToast('Copied! 📋')).catch(() => showToast('Copy failed'));
+}
+
+// ── Toast ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Allow Enter key to generate (but Shift+Enter for new line)
+document.getElementById('situationInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
+});
+</script>
+</body>
+</html>
